@@ -8,6 +8,7 @@ import { Request } from '../models/request';
 import { Response } from '../models/response';
 import { Shared } from './shared';
 import { Logger } from '../utils/logger';
+import { GetParamOrder } from '../helpers/params.helpers';
 
 export const METHOD = {
     GET: 'get',
@@ -143,13 +144,13 @@ export class HttpRequestHandler {
                         time: (end[0] * 1e9 + end[1]) / 1e6,
                     });
 
-                    response.execute();
+                    return response.execute();
                 } else {
                     const match = this.find(req);
                     if (match.map && match.m) {
                         const module = this.modules[match.map.parent];
 
-                        if (request.method === 'get') {
+                        if (request.method !== 'GET') {
                             const body = await request.rawbody();
                             request.body = body;
                         }
@@ -175,9 +176,24 @@ export class HttpRequestHandler {
 
                         const name = match.map.methodName;
 
+                        const unsortedParams = getMetadataStorage().getGroupMethodMetadata(
+                            name,
+                            module.name,
+                            'combined'
+                        );
+
+                        const sortedParams = GetParamOrder(
+                            {
+                                context: this.context(contextPayload),
+                            },
+                            unsortedParams
+                        );
+
                         // @ts-ignore
-                        const executionFunction = module.module[name];
-                        await executionFunction(this.context(contextPayload));
+                        const result = await module.module[name].apply(
+                            module.module,
+                            sortedParams
+                        );
                         const end = process.hrtime(start);
 
                         Logger.success({
@@ -186,6 +202,9 @@ export class HttpRequestHandler {
                             time: (end[0] * 1e9 + end[1]) / 1e6,
                         });
 
+                        if (result) {
+                            response.json(result);
+                        }
                         return response.execute();
                     } else {
                         response.status(404);

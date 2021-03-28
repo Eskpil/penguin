@@ -12,6 +12,8 @@ export function Arg(name: string): ParameterDecorator {
             name,
             idx: paramaterIdx,
             parent: propertyKey as string,
+            root: target.constructor.name,
+            parentKind: 'gql',
             kind: 'arg',
             type: type[paramaterIdx].name,
         });

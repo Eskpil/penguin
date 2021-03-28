@@ -1,5 +1,5 @@
 import { GraphQLFieldResolver } from 'graphql';
-import { GetParamOrder } from '../helpers/resolvers.helpers';
+import { GetParamOrder } from '../helpers/params.helpers';
 import { ResolverMetadata } from '../interfaces/resolver';
 import { QueryMetadataOptions } from '../metadata/declarations/Query.metadata';
 import { getMetadataStorage } from '../metadata/getMetadata';
@@ -18,7 +18,9 @@ export abstract class Resolvers {
             };
 
             const unsortedParams = getMetadataStorage().getGroupMethodMetadata(
-                metadata.methodName
+                metadata.methodName,
+                module.name,
+                'gql'
             );
             const sortedParams = GetParamOrder(resolverData, unsortedParams);
 

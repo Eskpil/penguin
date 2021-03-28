@@ -1,20 +1,8 @@
 import {
-    GraphQLBoolean,
-    GraphQLFloat,
-    GraphQLID,
-    GraphQLInt,
     GraphQLObjectType,
-    GraphQLOutputType,
     GraphQLSchema,
-    GraphQLString,
-    GraphQLNonNull,
-    GraphQLList,
-    GraphQLDirective,
-    DirectiveLocationEnum,
-    DirectiveLocation,
+    GraphQLInputObjectType,
 } from 'graphql';
-import { dir } from 'node:console';
-import { SchemaError } from '../errors/schema';
 import { decorateType, ifScalar } from '../helpers/schema.helpers';
 import { getMetadataStorage } from '../metadata/getMetadata';
 import { BaseModule } from '../module';
@@ -37,12 +25,14 @@ export class SchemaGenerator {
         };
     } = {};
     private objectTypes: GraphQLObjectType[] = [];
+    private inputTypes: GraphQLInputObjectType[] = [];
 
     constructor(options: Options) {
         for (const module of options.modules) {
             this.modules[module.name] = { ...module };
         }
         this.buildObjectTypes();
+        this.buildInputTypes();
     }
 
     build(): GraphQLSchema {
@@ -67,11 +57,13 @@ export class SchemaGenerator {
             } = {};
 
             const methodParams = getMetadataStorage().getGroupMethodMetadata(
-                query.methodName
+                query.methodName,
+                module.name,
+                'gql'
             );
 
             for (const arg of methodParams.filter((m) => m.kind === 'arg')) {
-                const argType = this.getGraphqlOutputType(arg);
+                const argType = this.getGraphqlInputType(arg);
                 args[arg.name!] = {
                     type: argType,
                 };
@@ -145,6 +137,59 @@ export class SchemaGenerator {
         });
     }
 
+    buildInputTypes() {
+        for (const inputMetadata of getMetadataStorage().getInputMetadata()) {
+            const inputType = this.buildInputType(inputMetadata.target);
+            if (!inputType) {
+                console.log('no inputtype');
+            }
+            this.inputTypes.push(inputType!);
+        }
+    }
+
+    buildInputType(name: string) {
+        const inputMetadata = getMetadataStorage()
+            .getInputMetadata()
+            .find((i) => i.name === name);
+
+        if (name === 'String') {
+            return null;
+        }
+
+        if (!inputMetadata) {
+            throw new Error(`Input: ${name} is not registered in metadata.`);
+        }
+
+        const fields: {
+            [key: string]: any;
+        } = {};
+
+        const fieldsMetadata = getMetadataStorage().getGroupFieldMetadata(
+            inputMetadata.name
+        );
+
+        for (const fieldMetadata of fieldsMetadata) {
+            let type = this.getGraphqlInputType(fieldsMetadata);
+            if (!type) {
+                this.buildInputType(fieldMetadata.type);
+                type = this.getGraphqlInputType(fieldMetadata);
+            }
+            if (!type) {
+                throw new Error(
+                    `Type: ${fieldMetadata.type} is not registered in metadata.`
+                );
+            }
+
+            fields[fieldMetadata.name] = {
+                type,
+            };
+        }
+        return new GraphQLInputObjectType({
+            name: inputMetadata.name,
+            fields,
+        });
+    }
+
     getGraphqlOutputType(field: any) {
         let type: any;
         type = ifScalar(field.type);
@@ -155,6 +200,30 @@ export class SchemaGenerator {
             );
             if (objectType) {
                 type = objectType;
+            }
+        }
+
+        if (type) {
+            const newType = decorateType(type, {
+                nullable: field.nullable,
+                array: field.array,
+            });
+            if (newType) type = newType;
+        }
+
+        return type;
+    }
+
+    getGraphqlInputType(field: any) {
+        let type: any;
+        type = ifScalar(field.type);
+
+        if (!type) {
+            const inputType = this.inputTypes.find(
+                (i) => i.name === field.type
+            );
+            if (inputType) {
+                type = inputType;
             }
         }
 
