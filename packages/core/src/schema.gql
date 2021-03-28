@@ -1,0 +1,15 @@
+directive @unique on FIELD_DEFINITION
+
+type Query {
+    hello(message: String!): Response!
+}
+
+type Response {
+    message: String!
+    description: String!
+    ok: Boolean! @unique
+}
+
+type ME {
+    id: ID!
+}

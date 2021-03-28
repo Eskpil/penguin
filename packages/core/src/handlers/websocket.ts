@@ -88,14 +88,19 @@ export class WebsocketRequestHandler {
                     const module = this.modules[event.parent];
 
                     // @ts-ignore
-                    const execute = module.module[event.methodName];
+                    const execute = await module.module[event.methodName]({
+                        websocket,
+                        data: body.data,
+                    });
 
-                    execute({ websocket, data: body.data });
+                    if (execute) {
+                        websocket.send(JSON.stringify(websocket));
+                    }
                 } else {
                     return websocket.send(
                         JSON.stringify({
                             code: 404,
-                            error: 'Event does not exist',
+                            error: 'Event does not exist.',
                             iat: new Date().getTime(),
                         })
                     );
