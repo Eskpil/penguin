@@ -6,6 +6,8 @@ export function Ctx(): ParameterDecorator {
             idx: paramaterIdx,
             parent: propertyKey as string,
             kind: 'context',
+            root: target.constructor.name,
+            parentKind: 'combined',
         });
     };
 }

@@ -1,8 +1,7 @@
-import { ResolverMetadata } from '../interfaces/resolver';
 import { MethodParamMetadataOptions } from '../metadata/declarations/Method.param.metadata';
 
 export const GetParamOrder = (
-    resolverData: ResolverMetadata,
+    data: any,
     params: MethodParamMetadataOptions[]
 ) => {
     const paramValues = params
@@ -10,9 +9,9 @@ export const GetParamOrder = (
         .map((paramInfo) => {
             switch (paramInfo.kind) {
                 case 'arg':
-                    return resolverData.args[paramInfo.name!];
+                    return data.args[paramInfo.name!];
                 case 'context':
-                    return resolverData.context;
+                    return data.context;
             }
         });
     return paramValues;

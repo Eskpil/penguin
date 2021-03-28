@@ -1,8 +1,10 @@
 import { EventMetadataOptions } from './declarations/Event.metadata';
 import { FieldMetadataOptions } from './declarations/Field.metadata';
+import { InputMetadataOptions } from './declarations/Input.metadata';
 import { MethodParamMetadataOptions } from './declarations/Method.param.metadata';
 import { ModuleOptions } from './declarations/Module.metadata';
 import { ObjectMetadataOptions } from './declarations/Object.metadata';
+import { PackageMetadataOptions } from './declarations/Package.metadata';
 import { QueryMetadataOptions } from './declarations/Query.metadata';
 import { RouteOptions } from './declarations/Route.metadata';
 
@@ -14,6 +16,8 @@ export class Metadata {
     private objectMetadata: ObjectMetadataOptions[] = [];
     private fieldMetadata: FieldMetadataOptions[] = [];
     private methodParamMetadata: MethodParamMetadataOptions[] = [];
+    private inputMetadata: InputMetadataOptions[] = [];
+    private packageMetadata: PackageMetadataOptions[] = [];
 
     collectRouteMetadata(options: RouteOptions) {
         this.routeMetadata.push(options);
@@ -30,7 +34,6 @@ export class Metadata {
     collectModuleMetadata(options: ModuleOptions) {
         this.moduleMetadata.push(options);
     }
-
     getModuleMetadata(identifyer?: string) {
         if (identifyer) {
             return this.moduleMetadata.find((v) => v.name === identifyer);
@@ -90,7 +93,28 @@ export class Metadata {
         this.methodParamMetadata.push(options);
     }
 
-    getGroupMethodMetadata(identifyer: string) {
-        return this.methodParamMetadata.filter((m) => m.parent === identifyer);
+    getGroupMethodMetadata(identifyer: string, root: string, kind: string) {
+        return this.methodParamMetadata.filter(
+            (m) =>
+                m.parent === identifyer &&
+                m.root === root &&
+                m.parentKind === kind
+        );
+    }
+
+    collectInputMetadata(options: InputMetadataOptions) {
+        this.inputMetadata.push(options);
+    }
+
+    getInputMetadata() {
+        return this.inputMetadata;
+    }
+
+    collectPackageMetadata(options: PackageMetadataOptions) {
+        this.packageMetadata.push(options);
+    }
+
+    getPackageMetadata() {
+        return this.packageMetadata;
     }
 }

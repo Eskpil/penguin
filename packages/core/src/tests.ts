@@ -7,6 +7,17 @@ import { ObjectType } from './decorators/object';
 import { Field } from './decorators/field';
 import { Arg } from './decorators/arg';
 import { Ctx } from './decorators/ctx';
+import { InputType } from './decorators/input';
+import { Package } from './decorators/package';
+
+@InputType()
+export class HelloInput {
+    @Field(() => String)
+    name: string;
+
+    @Field(() => String)
+    wants: string;
+}
 
 @ObjectType()
 export class Project {
@@ -35,11 +46,9 @@ export class MyObject {
 @Module({ for: 'MyObject' })
 export class GraphqlController extends BaseModule {
     @Query(() => MyObject)
-    hello(
-        @Arg('name') name: string,
-        @Arg('wants') wants: string,
-        @Ctx() ctx: any
-    ) {
+    hello(@Arg('options') options: HelloInput, @Ctx() ctx: any) {
+        const { name, wants } = options;
+
         return {
             name,
             project: {
@@ -51,19 +60,17 @@ export class GraphqlController extends BaseModule {
     }
 }
 
-@Module({
-    prefix: 'test',
-})
+@Module()
 export class Controller extends BaseModule {
     @Get()
-    async get(ctx: any) {
-        ctx.res.json({ get: 'success' });
+    async get() {
+        return { get: 'success' };
     }
 
     @Post()
-    async hello(ctx: any) {
+    async hello(@Ctx() ctx: any) {
         const body = ctx.req.body;
-        ctx.res.json(body);
+        return body;
     }
 
     @Get('jesus')
@@ -87,9 +94,7 @@ export class Controller extends BaseModule {
     }
 }
 
-@Module({
-    prefix: 'test2',
-})
+@Module()
 export class Controller2 extends BaseModule {
     @Post()
     async hello(ctx: any) {
@@ -97,3 +102,8 @@ export class Controller2 extends BaseModule {
         ctx.res.json(body);
     }
 }
+
+@Package({
+    imports: [GraphqlController, Controller, Controller2],
+})
+export class Tests {}

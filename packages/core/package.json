@@ -2,7 +2,7 @@
     "name": "@penguin/core",
     "version": "1.0.0",
     "private": true,
-    "main": "index.js",
+    "main": "dist/index",
     "license": "MIT",
     "dependencies": {
         "chalk": "^4.1.0",
@@ -10,11 +10,15 @@
         "cookie": "^0.4.1",
         "graphql": "^15.5.0",
         "graphql-jit": "^0.5.0",
-        "ws": "^7.4.3"
+        "reflect-metadata": "^0.1.13",
+        "ws": "^7.4.3",
+        "inflation": "^2.0.0"
     },
     "scripts": {
-        "dev": "nodemon --exec ts-node src/index.ts"
+        "dev": "nodemon --exec ts-node src/index.ts",
+        "build": "tsc"
     },
+    "types": "dist/index",
     "peerDependencies": {
         "@penguin/types": "1.0.0"
     },
@@ -22,6 +26,7 @@
         "@types/co-body": "^5.1.0",
         "@types/cookie": "^0.4.0",
         "@types/graphql": "^14.5.0",
+        "@types/inflation": "^2.0.0",
         "@types/node": "^14.14.31",
         "@types/ws": "^7.4.0",
         "nodemon": "^2.0.7",

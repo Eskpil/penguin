@@ -2,7 +2,7 @@ import { GraphQLSchema, parse, specifiedRules, validate } from 'graphql';
 import { compileQuery } from 'graphql-jit';
 import { Request } from '../models/request';
 import { Response } from '../models/response';
-import WebSocket from 'isomorphic-ws';
+import WebSocket from 'ws';
 import EventEmitter from 'events';
 
 export interface RequestPayload {

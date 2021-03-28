@@ -1,7 +1,6 @@
 import { GraphQLSchema, validateSchema } from 'graphql';
 import { createServer, Server } from 'http';
 import WebSocket, { Server as WsServer } from 'ws';
-import * as url from 'url';
 import { OrmOptions } from '@penguin/types';
 import { IncomingMessage } from 'node:http';
 import { Response } from './models/response';
@@ -9,7 +8,6 @@ import { BaseModule } from './module';
 import { WebsocketRequestHandler } from './handlers/websocket';
 import { getMetadataStorage } from './metadata/getMetadata';
 import { HttpRequestHandler } from './handlers/http';
-import { ModuleError } from './errors/module';
 import { SchemaGenerator } from './schema/create';
 
 interface ContextPayload {
@@ -33,7 +31,7 @@ interface Options {
 interface App {
     context: (params: ContextPayload) => void;
     prefix: string;
-    modules: any[];
+    packages: any[];
 }
 
 export class Mount {
@@ -75,21 +73,34 @@ export class Mount {
             this.orm = false;
         }
 
-        for (const rawModule of options.app.modules) {
-            const module: BaseModule = new rawModule();
-            const metadata = getMetadataStorage().getSingleModuleMetadata(
-                rawModule.name
-            );
+        for (const rawpack of options.app.packages) {
+            const pack = new rawpack();
+            const packageMetadata = getMetadataStorage()
+                .getPackageMetadata()
+                .find((p) => p.name === rawpack.name.toLowerCase());
 
-            if (!metadata) {
-                throw new ModuleError(rawModule.name);
+            if (!packageMetadata) {
+                throw new Error(
+                    `Package: ${rawpack.name} is not registered in metadata.`
+                );
             }
 
-            this.modules[metadata?.name!] = {
-                module,
-                prefix: metadata?.prefix!,
-                name: metadata?.name!,
-            };
+            for (const rawmodule of packageMetadata.imports) {
+                const module = new rawmodule();
+                const metadata = getMetadataStorage().getSingleModuleMetadata(
+                    rawmodule.name
+                );
+                if (!metadata) {
+                    throw new Error(
+                        `Module: ${rawmodule.name} is not registered in metadata.`
+                    );
+                }
+                this.modules[metadata.name] = {
+                    module,
+                    prefix: packageMetadata.prefix,
+                    name: metadata.name,
+                };
+            }
         }
 
         this.prefix = options.app.prefix;
@@ -116,7 +127,7 @@ export class Mount {
         this.ws = new WsServer({ noServer: true });
 
         this.server.on('upgrade', (request: IncomingMessage, socket, head) => {
-            if (request.url?.toLowerCase() === '/penguin') {
+            if (request.url?.toLowerCase() === this.path) {
                 this.ws.handleUpgrade(request, socket, head, (ws) => {
                     this.ws.emit('connection', ws, request);
                 });
@@ -127,7 +138,8 @@ export class Mount {
 
         this.server.listen(port);
         this.init();
-        return cb();
+        cb();
+        return this;
     }
 
     private async init() {
