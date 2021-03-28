@@ -6,7 +6,8 @@ export interface RouteOptions {
 }
 
 export interface ModuleOptionsInterface {
-    prefix: string;
+    prefix?: string;
+    for?: string;
 }
 
 export type ModuleOptions = ModuleOptionsInterface | string;

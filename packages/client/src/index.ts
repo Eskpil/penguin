@@ -1,8 +1,9 @@
 import Websocket from 'ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import axios from 'axios';
+import http from 'http';
 
-const ws = new ReconnectingWebSocket('ws://localhost:3000/graphql', [], {
+const ws = new ReconnectingWebSocket('ws://localhost:3000/penguin', [], {
     WebSocket: Websocket,
 });
 
@@ -11,15 +12,20 @@ const body = {
     operation: 'Hello',
     data: {
         body: `
-            query Hello($message: String!) {
-                hello(message: $message) {
-                    ok
-
+            query Hello($name: String!, $wants: String!){
+                hello(name: $name, wants: $wants) {
+                name
+                project {
+                    wants
+                    roles
+                    contributed
                 }
-            }
+                }
+            }          
         `,
         variables: {
-            message: 'Hope',
+            name: 'Linus',
+            wants: 'Sexy framework',
         },
     },
 };
@@ -35,7 +41,7 @@ const withws = () => {
 const withRest = async () => {
     console.time('time');
     const data = await axios({
-        url: 'http://localhost:7000/graphql',
+        url: 'http://localhost:3000/graphql',
         method: 'POST',
         data: JSON.stringify(body),
         headers: {
@@ -50,14 +56,17 @@ const withRest = async () => {
 
 const customWsEvent = () => {
     ws.addEventListener('open', () => {
+        console.log('handshake');
+
         ws.send(JSON.stringify({ e: 'uwu', data: { jesus: 'christ' } }));
     });
 };
 
+withws();
 // withRest();
-customWsEvent();
+// customWsEvent();
 
 ws.addEventListener('message', (result: any) => {
     const data = JSON.parse(result.data);
-    console.log(data);
+    console.log(data.data.hello);
 });

@@ -3,6 +3,7 @@ import { compileQuery } from 'graphql-jit';
 import { Request } from '../models/request';
 import { Response } from '../models/response';
 import WebSocket from 'isomorphic-ws';
+import EventEmitter from 'events';
 
 export interface RequestPayload {
     operation: string;
@@ -29,7 +30,7 @@ interface Context {
     res?: Response;
 }
 
-export class Shared {
+export abstract class Shared extends EventEmitter {
     static async graphql(options: GraphqlOptions) {
         return new Promise(async (res, rej) => {
             const documentAST = parse(options.data.body);
@@ -65,13 +66,20 @@ export class Shared {
                 );
             }
 
-            const result = options.cache[options.data.body].query(
+            const result = await options.cache[options.data.body].query(
                 '',
                 options.context(contextPayload),
                 options.data.variables
             );
 
-            res(result);
+            res(
+                result.errors
+                    ? {
+                          iat: new Date().getTime(),
+                          errors: result.errors,
+                      }
+                    : result
+            );
         });
     }
 

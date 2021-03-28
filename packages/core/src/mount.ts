@@ -1,6 +1,6 @@
 import { GraphQLSchema, validateSchema } from 'graphql';
 import { createServer, Server } from 'http';
-import { Server as WsServer } from 'ws';
+import WebSocket, { Server as WsServer } from 'ws';
 import * as url from 'url';
 import { OrmOptions } from '@penguin/types';
 import { IncomingMessage } from 'node:http';
@@ -9,28 +9,23 @@ import { BaseModule } from './module';
 import { WebsocketRequestHandler } from './handlers/websocket';
 import { getMetadataStorage } from './metadata/getMetadata';
 import { HttpRequestHandler } from './handlers/http';
+import { ModuleError } from './errors/module';
+import { SchemaGenerator } from './schema/create';
 
 interface ContextPayload {
-    ws?: WsServer;
-    http?: Server;
+    ws?: WebSocket;
     req?: IncomingMessage;
     res?: Response;
-    route?: {
-        param?: string;
-        query?: {
-            [key: string]: string;
-        };
-    };
 }
 
 interface GraphqlOptions {
     rootValue?: string;
-    schema: GraphQLSchema;
+    schema?: GraphQLSchema;
     path?: string;
 }
 
 interface Options {
-    graphql: GraphqlOptions;
+    graphql?: GraphqlOptions;
     orm: OrmOptions | boolean;
     app: App;
 }
@@ -57,18 +52,22 @@ export class Mount {
         };
     } = {};
     private prefix: string;
+    private schemaBuilder: SchemaGenerator;
 
     constructor(options: Options) {
-        this.path = options.graphql.path || '/graphql';
-        this.context = options.app.context;
-
-        const schemaErrors = validateSchema(options.graphql.schema);
-
-        if (schemaErrors.length > 0) {
-            throw new Error(schemaErrors.toString());
+        if (options.graphql) {
+            if (options.graphql.rootValue) {
+                this.rootValue = options.graphql.rootValue;
+            }
+            if (options.graphql.path) {
+                this.path = options.graphql.path!;
+            } else {
+                this.path = '/penguin';
+            }
+        } else {
+            this.path = '/penguin';
         }
-
-        this.schema = options.graphql.schema;
+        this.context = options.app.context;
 
         if (options.orm) {
             this.orm = options.orm;
@@ -83,9 +82,7 @@ export class Mount {
             );
 
             if (!metadata) {
-                throw new Error(
-                    `Module ${rawModule.name} is invalid, missing @Module() decorator`
-                );
+                throw new ModuleError(rawModule.name);
             }
 
             this.modules[metadata?.name!] = {
@@ -97,21 +94,30 @@ export class Mount {
 
         this.prefix = options.app.prefix;
 
-        if (options.graphql.rootValue) {
-            this.rootValue = options.graphql.rootValue;
+        this.schemaBuilder = new SchemaGenerator({
+            modules: Object.entries(this.modules).map((m) => {
+                return {
+                    prefix: m[1].prefix,
+                    module: m[1].module,
+                    name: m[1].name,
+                };
+            }),
+        });
+        this.schema = this.schemaBuilder.build();
+        const schemaErrors = validateSchema(this.schema);
+
+        if (schemaErrors.length > 0) {
+            throw new Error(schemaErrors.toString());
         }
     }
 
-    async listen(port: number, cb: Function) {
+    listen(port: number, cb: Function): Mount {
         this.server = createServer();
         this.ws = new WsServer({ noServer: true });
 
         this.server.on('upgrade', (request: IncomingMessage, socket, head) => {
-            const pathname = url.parse(request.url!).pathname;
-
-            if (pathname === this.path || pathname === '/graphql') {
+            if (request.url?.toLowerCase() === '/penguin') {
                 this.ws.handleUpgrade(request, socket, head, (ws) => {
-                    (ws as any).upgradeReq === request;
                     this.ws.emit('connection', ws, request);
                 });
             } else {
@@ -121,34 +127,37 @@ export class Mount {
 
         this.server.listen(port);
         this.init();
-        cb(this.ws, this.ws);
+        return cb();
     }
 
     private async init() {
-        const rawModules = Object.entries(this.modules);
-
-        const modules = rawModules.map((m) => {
-            return {
-                prefix: m[1].prefix,
-                module: m[1].module,
-                name: m[1].name,
-            };
-        });
-
         new WebsocketRequestHandler({
             schema: this.schema,
             server: this.ws,
             context: this.context,
-            modules,
+            modules: Object.entries(this.modules).map((m) => {
+                return {
+                    prefix: m[1].prefix,
+                    module: m[1].module,
+                    name: m[1].name,
+                };
+            }),
         }).init();
-
         new HttpRequestHandler({
             schema: this.schema,
             server: this.server,
             prefix: this.prefix,
-            modules,
+            modules: Object.entries(this.modules).map((m) => {
+                return {
+                    prefix: m[1].prefix,
+                    module: m[1].module,
+                    name: m[1].name,
+                };
+            }),
             path: this.path,
             context: this.context,
         }).init();
     }
+
+    append() {}
 }

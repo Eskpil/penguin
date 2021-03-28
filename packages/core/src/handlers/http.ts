@@ -149,8 +149,10 @@ export class HttpRequestHandler {
                     if (match.map && match.m) {
                         const module = this.modules[match.map.parent];
 
-                        const body = await request.rawbody();
-                        request.body = body;
+                        if (request.method === 'get') {
+                            const body = await request.rawbody();
+                            request.body = body;
+                        }
 
                         if (match.map.param.length > 0) {
                             const params: {
@@ -184,7 +186,7 @@ export class HttpRequestHandler {
                             time: (end[0] * 1e9 + end[1]) / 1e6,
                         });
 
-                        response.execute();
+                        return response.execute();
                     } else {
                         response.status(404);
                         response.json({

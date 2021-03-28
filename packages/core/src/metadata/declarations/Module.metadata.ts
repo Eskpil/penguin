@@ -1,4 +1,5 @@
 export interface ModuleOptions {
-    prefix: string;
+    prefix?: string;
     name: string;
+    for?: string;
 }
