@@ -2,7 +2,10 @@ import { EventMetadataOptions } from './declarations/Event.metadata';
 import { FieldMetadataOptions } from './declarations/Field.metadata';
 import { InputMetadataOptions } from './declarations/Input.metadata';
 import { MethodParamMetadataOptions } from './declarations/Method.param.metadata';
-import { ModuleOptions } from './declarations/Module.metadata';
+import {
+    BuiltModuleMetadataOptions,
+    ModuleOptions,
+} from './declarations/Module.metadata';
 import { ObjectMetadataOptions } from './declarations/Object.metadata';
 import { PackageMetadataOptions } from './declarations/Package.metadata';
 import { QueryMetadataOptions } from './declarations/Query.metadata';
@@ -18,6 +21,7 @@ export class Metadata {
     private methodParamMetadata: MethodParamMetadataOptions[] = [];
     private inputMetadata: InputMetadataOptions[] = [];
     private packageMetadata: PackageMetadataOptions[] = [];
+    private builtModuleMetadata: BuiltModuleMetadataOptions[] = [];
 
     collectRouteMetadata(options: RouteOptions) {
         this.routeMetadata.push(options);
@@ -116,5 +120,13 @@ export class Metadata {
 
     getPackageMetadata() {
         return this.packageMetadata;
+    }
+
+    collectBuiltModuleMetadata(options: BuiltModuleMetadataOptions) {
+        this.builtModuleMetadata.push(options);
+    }
+
+    getBuiltModuleMetadata() {
+        return this.builtModuleMetadata;
     }
 }

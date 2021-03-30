@@ -2,7 +2,7 @@ import { GraphQLSchema } from 'graphql';
 import { Server } from 'http';
 import { IncomingMessage, ServerResponse } from 'node:http';
 import { getMetadataStorage } from '../metadata/getMetadata';
-import { BaseModule } from '../module';
+import { BaseModule } from '../module/base';
 import { Util } from '../utils/request';
 import { Request } from '../models/request';
 import { Response } from '../models/response';
@@ -21,11 +21,6 @@ export const METHOD = {
 };
 
 interface Options {
-    modules: {
-        prefix: string;
-        name: string;
-        module: BaseModule;
-    }[];
     server: Server;
     path?: string;
     schema?: GraphQLSchema;
@@ -34,13 +29,7 @@ interface Options {
 }
 
 export class HttpRequestHandler {
-    private modules: {
-        [key: string]: {
-            prefix: string;
-            name: string;
-            module: BaseModule;
-        };
-    } = {};
+    private modules = getMetadataStorage().getBuiltModuleMetadata();
     private server: Server;
     private schema: GraphQLSchema;
     private context: Function;
@@ -64,9 +53,6 @@ export class HttpRequestHandler {
         for (const i in METHOD) {
             this.routes[(METHOD as any)[i]] = [];
         }
-        for (const module of options.modules) {
-            this.modules[module.name] = { ...module };
-        }
         this.server = options.server;
         if (options.schema) {
             this.schema = options.schema;
@@ -81,28 +67,27 @@ export class HttpRequestHandler {
     }
 
     init() {
-        const modules = Object.entries(this.modules);
-        for (const module of modules) {
+        for (const module of this.modules) {
             const routes = getMetadataStorage().getGroupRouteMetadata(
-                module[1].name
+                module.name
             );
             for (const route of routes) {
                 this.routes[route.method].push({
                     methodName: route.methodName,
                     reg: Util.pathToReg(
                         this.prefix,
-                        module[1].prefix,
+                        module.pack.prefix,
                         route.endpoint
                     ),
                     path: Util.pathJoin(
                         this.prefix,
-                        module[1].prefix,
+                        module.pack.prefix,
                         route.endpoint
                     ).replace(/:(\w+)/g, '{$1}'),
                     param: (route.endpoint.match(/:\w+/g) || []).map((a) =>
                         a.substr(1)
                     ),
-                    parent: module[1].name,
+                    parent: module.name,
                 });
             }
         }
@@ -148,7 +133,9 @@ export class HttpRequestHandler {
                 } else {
                     const match = this.find(req);
                     if (match.map && match.m) {
-                        const module = this.modules[match.map.parent];
+                        const module = this.modules.find(
+                            (m) => m.name === match.map.parent
+                        );
 
                         if (request.method !== 'GET') {
                             const body = await request.rawbody();
@@ -178,7 +165,7 @@ export class HttpRequestHandler {
 
                         const unsortedParams = getMetadataStorage().getGroupMethodMetadata(
                             name,
-                            module.name,
+                            module!.name,
                             'combined'
                         );
 
@@ -191,7 +178,7 @@ export class HttpRequestHandler {
 
                         // @ts-ignore
                         const result = await module.module[name].apply(
-                            module.module,
+                            module!.module,
                             sortedParams
                         );
                         const end = process.hrtime(start);

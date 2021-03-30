@@ -1,9 +1,9 @@
 import { Module, Query } from '@penguin/core';
 
 @Module()
-export class GraphQLTestModule {
+export class HelloGraphQlModule {
     @Query(() => String)
-    async hello() {
-        return 'Holà, Mundo!';
+    hello() {
+        return 'Holà Mundo!';
     }
 }

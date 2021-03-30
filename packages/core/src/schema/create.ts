@@ -5,32 +5,15 @@ import {
 } from 'graphql';
 import { decorateType, ifScalar } from '../helpers/schema.helpers';
 import { getMetadataStorage } from '../metadata/getMetadata';
-import { BaseModule } from '../module';
+import { BaseModule } from '../module/base';
 import { Resolvers } from '../resolvers/create';
 
-interface Options {
-    modules: {
-        prefix: string;
-        name: string;
-        module: BaseModule;
-    }[];
-}
-
 export class SchemaGenerator {
-    private modules: {
-        [key: string]: {
-            name: string;
-            prefix: string;
-            module: BaseModule;
-        };
-    } = {};
+    private modules = getMetadataStorage().getBuiltModuleMetadata();
     private objectTypes: GraphQLObjectType[] = [];
     private inputTypes: GraphQLInputObjectType[] = [];
 
-    constructor(options: Options) {
-        for (const module of options.modules) {
-            this.modules[module.name] = { ...module };
-        }
+    constructor() {
         this.buildObjectTypes();
         this.buildInputTypes();
     }
@@ -50,7 +33,13 @@ export class SchemaGenerator {
 
         for (const query of queries) {
             const type = this.getGraphqlOutputType(query);
-            const module = this.modules[query.parent];
+            const module = this.modules.find((m) => m.name === query.parent);
+
+            if (!module) {
+                throw new Error(
+                    `Query: ${query.name} does not have a parent registered in metadata.`
+                );
+            }
 
             const args: {
                 [key: string]: any;
