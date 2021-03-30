@@ -1,5 +1,16 @@
+import { BaseModule } from '../../module/base';
+
 export interface ModuleOptions {
-    prefix?: string;
     name: string;
     for?: string;
+}
+
+export interface BuiltModuleMetadataOptions {
+    name: string;
+    module: BaseModule;
+    pack: {
+        prefix: string;
+        name: string;
+        package: any;
+    };
 }
