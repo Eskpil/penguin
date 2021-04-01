@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { RouteOptions } from '@penguin/types';
-import { getMetadataStorage } from '../metadata/getMetadata';
+import { getMetadataStorage } from '@penguin/metadata';
 
 export function Route(options: RouteOptions): MethodDecorator {
     return (prototype, methodName) => {

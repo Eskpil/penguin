@@ -1,8 +1,7 @@
 import { GraphQLFieldResolver } from 'graphql';
 import { GetParamOrder } from '../helpers/params.helpers';
 import { ResolverMetadata } from '../interfaces/resolver';
-import { QueryMetadataOptions } from '../metadata/declarations/Query.metadata';
-import { getMetadataStorage } from '../metadata/getMetadata';
+import { QueryMetadataOptions, getMetadataStorage } from '@penguin/metadata';
 
 export abstract class Resolvers {
     static create(

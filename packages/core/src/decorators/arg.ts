@@ -1,4 +1,4 @@
-import { getMetadataStorage } from '../metadata/getMetadata';
+import { getMetadataStorage } from '@penguin/metadata';
 
 export function Arg(name: string): ParameterDecorator {
     return (target, propertyKey, paramaterIdx) => {

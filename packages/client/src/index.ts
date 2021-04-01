@@ -9,23 +9,19 @@ const ws = new ReconnectingWebSocket('ws://localhost:3000/penguin', [], {
 
 const body = {
     opcode: '0',
-    operation: 'Hello',
+    operation: 'Project',
     data: {
         body: `
-            query Hello($name: String!, $wants: String!){
-                hello(name: $name, wants: $wants) {
-                name
-                project {
-                    wants
-                    roles
-                    contributed
+            query Project($name: String!) {
+                project(name: $name) {
+                    name
+                    repo
+                    contributers
                 }
-                }
-            }          
+            }         
         `,
         variables: {
-            name: 'Linus',
-            wants: 'Sexy framework',
+            name: 'Penguin',
         },
     },
 };

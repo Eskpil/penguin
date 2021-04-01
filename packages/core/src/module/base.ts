@@ -1,4 +1,4 @@
-import { generateSnowflake } from './utils/snowflake';
+import { generateSnowflake } from '../utils/snowflake';
 
 interface Options {
     orm: any;

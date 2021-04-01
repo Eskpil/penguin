@@ -1,4 +1,4 @@
-import { getMetadataStorage } from '../metadata/getMetadata';
+import { getMetadataStorage } from '@penguin/metadata';
 
 export function ObjectType(name?: string): ClassDecorator {
     return (target) => {

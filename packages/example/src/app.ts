@@ -1,15 +1,13 @@
 import { Mount } from '@penguin/core';
-import { Hello } from './modules/hello/root';
+import { Hello, Project } from './modules';
 
 (async () => {
-    const app = new Mount({
+    new Mount({
         app: {
             context: ({ req, res, ws }) => ({ req, res, ws }),
             prefix: 'api',
-            packages: [Hello],
+            packages: [Hello, Project],
         },
         orm: false,
-    });
-
-    app.listen(4000, () => console.log(`Penguin server started on port 4000`));
+    }).listen(4000, () => console.log(`Penguin server started on port 4000`))
 })();

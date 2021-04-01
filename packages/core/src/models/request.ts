@@ -11,7 +11,7 @@ export class Request {
     private headersObject: {
         [key: string]: string;
     } = {};
-    private bodyObj: any;
+    body: any;
     private rawParams: any;
 
     constructor(req: IncomingMessage) {
@@ -38,14 +38,6 @@ export class Request {
 
     get method(): String {
         return this.req.method!;
-    }
-
-    set body(body: object) {
-        this.bodyObj = body;
-    }
-
-    get body() {
-        return this.bodyObj;
     }
 
     set params(params: any) {

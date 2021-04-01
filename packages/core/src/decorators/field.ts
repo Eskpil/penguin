@@ -1,4 +1,4 @@
-import { getMetadataStorage } from '../metadata/getMetadata';
+import { getMetadataStorage } from '@penguin/metadata';
 
 interface Options {
     name?: string;

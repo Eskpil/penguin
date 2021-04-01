@@ -1,11 +1,11 @@
 import { Get, Module } from '@penguin/core';
 
 @Module()
-export class ControllerTestModule {
+export class HelloControllerModule {
     @Get()
     hello() {
         return {
-            Holà: 'Mundo!',
+            message: 'Holà Mundo!',
         };
     }
 }

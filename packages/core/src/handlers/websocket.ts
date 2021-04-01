@@ -1,28 +1,17 @@
-import { BaseModule } from '../module';
 import { Server } from 'ws';
 import { RequestPayload, Shared } from './shared';
 import { GraphQLSchema } from 'graphql';
-import { getMetadataStorage } from '../metadata/getMetadata';
+import { getMetadataStorage } from '@penguin/metadata';
+import { Module } from '../module/module';
 
 interface Options {
-    modules: {
-        prefix: string;
-        name: string;
-        module: BaseModule;
-    }[];
     server: Server;
     schema?: GraphQLSchema;
     context: Function;
 }
 
 export class WebsocketRequestHandler {
-    private modules: {
-        [key: string]: {
-            prefix: string;
-            name: string;
-            module: BaseModule;
-        };
-    } = {};
+    private modules = getMetadataStorage().getBuiltModuleMetadata();
     private server: Server;
     private schema: GraphQLSchema;
     private context: Function;
@@ -40,9 +29,6 @@ export class WebsocketRequestHandler {
     } = {};
 
     constructor(options: Options) {
-        for (const module of options.modules) {
-            this.modules[module.name] = { ...module };
-        }
         this.server = options.server;
         if (options.schema) {
             this.schema = options.schema;
@@ -51,10 +37,9 @@ export class WebsocketRequestHandler {
     }
 
     async init() {
-        const modules = Object.entries(this.modules);
-        for (const module of modules) {
+        for (const module of this.modules) {
             const events = getMetadataStorage().getGroupEventMetadata(
-                module[1].name
+                module.name
             );
             for (const event of events) {
                 this.events[event.name] = {
@@ -85,13 +70,9 @@ export class WebsocketRequestHandler {
 
                 if (eventname in this.events) {
                     const event = this.events[eventname];
-                    const module = this.modules[event.parent];
-
+                    const module = Module.find(eventname)
                     // @ts-ignore
-                    const execute = await module.module[event.methodName]({
-                        websocket,
-                        data: body.data,
-                    });
+                    const execute = await module.module[event.methodName].apply(module?.module, body)
 
                     if (execute) {
                         websocket.send(JSON.stringify(websocket));

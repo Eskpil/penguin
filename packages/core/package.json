@@ -20,7 +20,8 @@
     },
     "types": "dist/index",
     "peerDependencies": {
-        "@penguin/types": "1.0.0"
+        "@penguin/types": "1.0.0",
+        "@penguin/metadata": "1.0.0"
     },
     "devDependencies": {
         "@types/co-body": "^5.1.0",
