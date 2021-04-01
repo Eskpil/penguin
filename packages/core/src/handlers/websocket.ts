@@ -1,7 +1,8 @@
 import { Server } from 'ws';
 import { RequestPayload, Shared } from './shared';
 import { GraphQLSchema } from 'graphql';
-import { getMetadataStorage } from '../metadata/getMetadata';
+import { getMetadataStorage } from '@penguin/metadata';
+import { Module } from '../module/module';
 
 interface Options {
     server: Server;
@@ -69,15 +70,9 @@ export class WebsocketRequestHandler {
 
                 if (eventname in this.events) {
                     const event = this.events[eventname];
-                    const module = this.modules.find(
-                        (m) => m.name === event.parent
-                    );
-
+                    const module = Module.find(eventname)
                     // @ts-ignore
-                    const execute = await module.module[event.methodName]({
-                        websocket,
-                        data: body.data,
-                    });
+                    const execute = await module.module[event.methodName].apply(module?.module, body)
 
                     if (execute) {
                         websocket.send(JSON.stringify(websocket));

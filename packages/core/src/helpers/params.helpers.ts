@@ -1,4 +1,4 @@
-import { MethodParamMetadataOptions } from '../metadata/declarations/Method.param.metadata';
+import { MethodParamMetadataOptions } from '@penguin/metadata';
 
 export const GetParamOrder = (
     data: any,

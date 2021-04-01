@@ -4,12 +4,11 @@ import {
     GraphQLInputObjectType,
 } from 'graphql';
 import { decorateType, ifScalar } from '../helpers/schema.helpers';
-import { getMetadataStorage } from '../metadata/getMetadata';
-import { BaseModule } from '../module/base';
+import { getMetadataStorage} from "@penguin/metadata"
 import { Resolvers } from '../resolvers/create';
+import { Module } from '../module/module';
 
 export class SchemaGenerator {
-    private modules = getMetadataStorage().getBuiltModuleMetadata();
     private objectTypes: GraphQLObjectType[] = [];
     private inputTypes: GraphQLInputObjectType[] = [];
 
@@ -33,7 +32,7 @@ export class SchemaGenerator {
 
         for (const query of queries) {
             const type = this.getGraphqlOutputType(query);
-            const module = this.modules.find((m) => m.name === query.parent);
+            const module = Module.find(query.parent)
 
             if (!module) {
                 throw new Error(

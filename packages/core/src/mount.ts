@@ -4,9 +4,7 @@ import WebSocket, { Server as WsServer } from 'ws';
 import { OrmOptions } from '@penguin/types';
 import { IncomingMessage } from 'node:http';
 import { Response } from './models/response';
-import { BaseModule } from './module/base';
 import { WebsocketRequestHandler } from './handlers/websocket';
-import { getMetadataStorage } from './metadata/getMetadata';
 import { HttpRequestHandler } from './handlers/http';
 import { SchemaGenerator } from './schema/create';
 import { Module } from './module/module';
@@ -111,5 +109,7 @@ export class Mount {
         }).init();
     }
 
-    append() {}
+    append(): Mount {
+        return this;
+    }
 }

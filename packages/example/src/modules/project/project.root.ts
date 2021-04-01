@@ -4,5 +4,8 @@ import { ProjectGraphqlModule } from './graphql.module';
 
 @Package({
     imports: [ProjectControllerModule, ProjectGraphqlModule],
+    
 })
-export class Project {}
+export class Project {
+  
+}

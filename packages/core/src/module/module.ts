@@ -1,6 +1,4 @@
-import { BuiltModuleMetadataOptions } from '../metadata/declarations/Module.metadata';
-import { PackageMetadataOptions } from '../metadata/declarations/Package.metadata';
-import { getMetadataStorage } from '../metadata/getMetadata';
+import { BuiltModuleMetadataOptions, PackageMetadataOptions, getMetadataStorage } from '@penguin/metadata';
 
 export abstract class Module {
     static buildFromPacks(packages: any[]) {
@@ -39,5 +37,9 @@ export abstract class Module {
             },
         };
         getMetadataStorage().collectBuiltModuleMetadata(final);
+    } 
+
+    static find(name: string) {
+        return getMetadataStorage().getBuiltModuleMetadata().find((m) => m.name === name)
     }
 }

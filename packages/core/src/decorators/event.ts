@@ -1,5 +1,5 @@
 import { EventOptions } from '@penguin/types';
-import { getMetadataStorage } from '../metadata/getMetadata';
+import { getMetadataStorage } from '@penguin/metadata';
 
 export function Event(options: EventOptions): MethodDecorator {
     return (prototype, methodName) => {

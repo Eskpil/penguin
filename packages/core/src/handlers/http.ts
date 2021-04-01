@@ -1,8 +1,7 @@
 import { GraphQLSchema } from 'graphql';
 import { Server } from 'http';
-import { IncomingMessage, ServerResponse } from 'node:http';
-import { getMetadataStorage } from '../metadata/getMetadata';
-import { BaseModule } from '../module/base';
+import { IncomingMessage, ServerResponse } from 'http';
+import { getMetadataStorage } from '@penguin/metadata';
 import { Util } from '../utils/request';
 import { Request } from '../models/request';
 import { Response } from '../models/response';

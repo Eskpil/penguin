@@ -23,6 +23,6 @@ declare namespace Reflect {
 
 declare namespace NodeJS {
     interface Global {
-        PenguinMetadata: import('./metadata/metadata').Metadata;
+        PenguinMetadata: import('@penguin/metadata').Metadata;
     }
 }

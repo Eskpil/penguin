@@ -1,4 +1,3 @@
-import { BaseModule } from '../../module/base';
 
 export interface ModuleOptions {
     name: string;
@@ -7,7 +6,7 @@ export interface ModuleOptions {
 
 export interface BuiltModuleMetadataOptions {
     name: string;
-    module: BaseModule;
+    module: any;
     pack: {
         prefix: string;
         name: string;

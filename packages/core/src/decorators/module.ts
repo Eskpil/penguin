@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { ModuleOptions } from '@penguin/types';
-import { getMetadataStorage } from '../metadata/getMetadata';
+import { getMetadataStorage } from '@penguin/metadata';
 
 export function Module(options?: ModuleOptions): ClassDecorator {
     return (target) => {
