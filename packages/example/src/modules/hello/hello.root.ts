@@ -1,4 +1,4 @@
-import { Package } from '@penguin/core';
+import { Package } from '@penguin/common';
 import { HelloControllerModule } from './controller.module';
 import { HelloGraphQlModule } from './graphql.module';
 

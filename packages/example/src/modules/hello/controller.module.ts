@@ -1,4 +1,4 @@
-import { Get, Module } from '@penguin/core';
+import { Get, Module } from '@penguin/common';
 
 @Module()
 export class HelloControllerModule {
