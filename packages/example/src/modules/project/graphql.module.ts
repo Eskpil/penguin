@@ -1,4 +1,5 @@
-import { Arg, Field, Module, ObjectType, Query } from '@penguin/core';
+import { Module } from '@penguin/common';
+import { Arg, Field, ObjectType, Query } from '@penguin/graphql';
 import { projects } from './project.shared';
 
 @ObjectType()

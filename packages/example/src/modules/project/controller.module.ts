@@ -1,11 +1,11 @@
-import { Ctx, Get, Module, Post } from '@penguin/core';
+import { Ctx, Get, Module, Post } from '@penguin/common';
 import { MyContext } from '../../types';
 import { projects } from './project.shared';
 
 @Module()
 export class ProjectControllerModule {
     @Get(':name')
-    project(@Ctx() ctx: MyContext) {
+    async project(@Ctx() ctx: MyContext) {
         const project = projects.find((p) => p.name === ctx.req.params.name);
         return project;
     }

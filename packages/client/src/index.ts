@@ -3,8 +3,12 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 import axios from 'axios';
 import http from 'http';
 
-const ws = new ReconnectingWebSocket('ws://localhost:3000/penguin', [], {
+const ws = new ReconnectingWebSocket('ws://localhost:4000/penguin', [], {
     WebSocket: Websocket,
+});
+
+ws.addEventListener('open', () => {
+    console.log('Connection opened');
 });
 
 const body = {
@@ -14,7 +18,7 @@ const body = {
         body: `
             query Project($name: String!) {
                 project(name: $name) {
-                    name
+                    name 
                     repo
                     contributers
                 }
@@ -27,17 +31,14 @@ const body = {
 };
 
 const withws = () => {
-    ws.addEventListener('open', () => {
-        console.log('Connection');
-        console.time('time');
-        ws.send(JSON.stringify(body));
-    });
+    ws.send(JSON.stringify(body));
+    console.time('wstime');
 };
 
 const withRest = async () => {
-    console.time('time');
+    console.time('httptime');
     const data = await axios({
-        url: 'http://localhost:3000/graphql',
+        url: 'http://localhost:4000/penguin',
         method: 'POST',
         data: JSON.stringify(body),
         headers: {
@@ -45,10 +46,37 @@ const withRest = async () => {
             Authorization: 'Bearer 123',
         },
         withCredentials: true,
+    }).then((data) => {
+        console.timeEnd('httptime');
+        console.log(data.data);
+        withws();
     });
-    console.timeEnd('time');
-    console.log(data.data);
 };
+
+// withRest();
+
+const httpRestRequest = async () => {
+    console.time('time');
+    http.get('http://localhost:4000/api/project/Penguin', (res) => {
+        let data = '';
+        res.on('data', (chunk) => {
+            data += chunk;
+        });
+
+        res.on('end', () => {
+            console.timeEnd('time');
+            console.log(JSON.parse(data));
+        });
+    });
+    // method: 'GET',
+    //     url: 'http://localhost:4000/api/project/Penguin',
+    // }).then(({ data }) => {
+    //     console.timeEnd('time');
+    //     console.log(data);
+    // });
+};
+
+httpRestRequest();
 
 const customWsEvent = () => {
     ws.addEventListener('open', () => {
@@ -58,11 +86,9 @@ const customWsEvent = () => {
     });
 };
 
-withws();
-// withRest();
 // customWsEvent();
 
-ws.addEventListener('message', (result: any) => {
-    const data = JSON.parse(result.data);
-    console.log(data.data.hello);
+ws.addEventListener('message', (result) => {
+    console.timeEnd('wstime');
+    console.log(JSON.parse(result.data));
 });

@@ -1,6 +1,6 @@
-import { Request, Response } from "@penguin/core";
+import { Request, Response } from '@penguin/common';
 
 export type MyContext = {
-    req: Request,
-    res: Response
-}
+    req: Request;
+    res: Response;
+};
