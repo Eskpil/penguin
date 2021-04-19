@@ -1,13 +1,15 @@
 {
-    "name": "penguinjs",
+    "name": "penguin",
     "private": true,
     "devDependencies": {
         "lerna": "^3.22.1"
     },
     "workspaces": {
         "packages": [
-            "./packages/*",
-            "./packages/**/*"
+            "./packages/*"
         ]
+    },
+    "scripts": {
+        "build:all": "lerna run build --scope={@penguin/core,@penguin/common,@penguin/metadata,@penguin/graphql}"
     }
 }

@@ -3,6 +3,6 @@ import { ProjectControllerModule } from './controller.module';
 import { ProjectGraphqlModule } from './graphql.module';
 
 @Package({
-    imports: [ProjectControllerModule, ProjectGraphqlModule],
+    modules: [ProjectControllerModule, ProjectGraphqlModule],
 })
 export class Project {}

@@ -8,7 +8,7 @@ const Navbar: React.FC<{}> = () => {
         <>
             <div
                 className={`w-full h-12 flex justify-around items-center p-8 ${
-                    !open ? 'shadow-2xl' : 'shadow-md'
+                    !open ? 'shadow-xl' : 'shadow-md'
                 }`}
             >
                 <Link href="/">
@@ -25,9 +25,9 @@ const Navbar: React.FC<{}> = () => {
                                     viewBox="0 0 32 32"
                                     fill="none"
                                     stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
                                 >
                                     {' '}
                                     <path
@@ -58,9 +58,9 @@ const Navbar: React.FC<{}> = () => {
                                     viewBox="0 0 32 32"
                                     fill="none"
                                     stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
                                 >
                                     <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
                                 </svg>
@@ -69,7 +69,7 @@ const Navbar: React.FC<{}> = () => {
                         </a>
                     </li>
                 </ul>
-                <div className="flex md:hidden relative z-10">
+                <div className="flex md:hidden">
                     <span onClick={() => setOpen(!open)}>
                         <svg
                             className="h-8 w-8 text-white"
@@ -78,16 +78,20 @@ const Navbar: React.FC<{}> = () => {
                             stroke="currentColor"
                         >
                             <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
                                 d="M4 6h16M4 12h16M4 18h16"
                             />
                         </svg>
                     </span>
                 </div>
             </div>
-            <div className={`${open ? 'block' : 'hidden'} w-full shadow-2xl`}>
+            <div
+                className={`${
+                    open ? 'relative' : 'hidden'
+                } w-full shadow-2xl z-10`}
+            >
                 <ul className="p-4 flex flex-col justify-center items-center">
                     <li>
                         <a

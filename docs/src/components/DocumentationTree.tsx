@@ -30,7 +30,7 @@ export const DocumentationTree: React.FC = ({}) => {
     }, [container]);
 
     return (
-        <div className="flex bg-gray-800 w-60 flex-col justify-center p-8 rounded-2xl shadow-2xl">
+        <div className="flex bg-gray-800 h-full w-60 flex-col p-8 rounded-2xl shadow-xl">
             <div>
                 <h1 className="font-bold text-white">Common</h1>
                 <ul>
@@ -75,24 +75,4 @@ export const DocumentationTree: React.FC = ({}) => {
             </div>
         </div>
     );
-};
-
-export const getStaticProps = () => {
-    const common = container
-        .filter((c) => c.params.category === 'common')
-        .map((c) => ({ name: c.params.name }));
-    const core = container
-        .filter((c) => c.params.category === 'core')
-        .map((c) => ({ name: c.params.name }));
-    const graphql = container
-        .filter((c) => c.params.category === 'graphql')
-        .map((c) => ({ name: c.params.name }));
-
-    return {
-        props: {
-            graphql,
-            core,
-            common,
-        },
-    };
 };

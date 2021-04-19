@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Layout from '../../../components/Layout';
 import { Container, container } from '../../../container';
 import { useRouter } from 'next/router';
-import { Redirect } from 'next/';
 
 interface Props {
     final: {
@@ -60,55 +59,7 @@ const DocumentationPage: React.FC<Props> = (props) => {
         );
     }
 
-    return <div>Hello</div>;
+    return <div>My name is jeff.</div>;
 };
-
-// export const getStaticPaths = (context: any) => {
-//     return {
-//         paths: [
-//             ...container.map((c) => ({
-//                 params: {
-//                     category: c.params.category,
-//                     page: c.params.name,
-//                 },
-//             })),
-//         ],
-//         fallback: true,
-//     };
-// };
-
-// // export const getStaticProps = (context: any) => {
-// //     const page = context.params.page.toString().toLowerCase();
-//     const category = context.params.category.toString().toLowerCase();
-
-//     const component = container.find(
-//         (c) =>
-//             c.params.name.toLowerCase() === page &&
-//             c.params.category.toLowerCase() === category
-//     );
-
-//     if (!component) {
-//         return {
-//             redirect: {
-//                 destination: '/',
-//                 permanent: false,
-//             },
-//         };
-//     }
-
-//     const final = {
-//         meta: component.meta,
-//         params: {
-//             page,
-//             category,
-//         },
-//     };
-
-//     return {
-//         props: {
-//             final,
-//         },
-//     };
-// };
 
 export default DocumentationPage;

@@ -10,7 +10,7 @@ import {
 } from 'graphql';
 import { CompiledQuery, compileQuery } from 'graphql-jit';
 import LRU from 'tiny-lru';
-import { SchemaGenerator } from '@penguin/graphql';
+import { SchemaGenerator } from './schema';
 
 interface ErrorCacheValue {
     document: DocumentNode;
@@ -35,7 +35,7 @@ interface Options {
     payload: Payload;
 }
 
-export class HandlerHelper {
+export class GraphQLExecuter {
     private cache = LRU<CompiledQuery>(1024);
     private schema: GraphQLSchema = new SchemaGenerator().build();
     context: Function;
@@ -56,9 +56,13 @@ export class HandlerHelper {
                 document = parse(new Source(query, 'Graphql Request'));
             } catch (err) {
                 if (options.res) {
-                    options.res
+                    return options.res
                         .status(400)
-                        .json({ errors: err, iat: new Date().getTime() });
+                        .json({
+                            errors: JSON.parse(err.message),
+                            iat: new Date().getTime(),
+                        })
+                        .execute();
                 } else {
                     errors.push(err);
                 }
@@ -71,10 +75,13 @@ export class HandlerHelper {
             );
             if (validationErrors.length > 0) {
                 if (options.res) {
-                    options.res.status(400).json({
-                        errors: validationErrors,
-                        iat: new Date().getTime(),
-                    });
+                    return options.res
+                        .status(400)
+                        .json({
+                            errors: validationErrors.toString(),
+                            iat: new Date().getTime(),
+                        })
+                        .execute();
                 } else {
                     errors.push(validationErrors);
                 }
@@ -109,21 +116,17 @@ export class HandlerHelper {
         );
 
         if (options.res) {
-            options.res
-                .status(200)
-                .json({ data: result.data, errors: result.errors })
-                .execute();
-        } else {
-            options.socket!.send({
-                id,
-                type: 'next',
-                payload: result,
-            });
-            options.socket!.send({
-                id,
-                type: 'complete',
-            });
+            return options.res.status(200).json(result).execute();
         }
+        options.socket!.send({
+            id,
+            type: 'next',
+            payload: result,
+        });
+        return options.socket!.send({
+            id,
+            type: 'complete',
+        });
     }
 
     parseSocketParams(payload: any): Payload {

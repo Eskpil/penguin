@@ -15,6 +15,9 @@
         "build": "tsc"
     },
     "dependencies": {
-        "graphql": "^15.5.0"
+        "@apollographql/graphql-playground-html": "^1.6.27",
+        "graphql": "^15.5.0",
+        "graphql-jit": "^0.5.0",
+        "tiny-lru": "^7.0.6"
     }
 }

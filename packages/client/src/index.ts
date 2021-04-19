@@ -9,17 +9,18 @@ const ws = new ReconnectingWebSocket('ws://localhost:4000/penguin', [], {
 
 ws.addEventListener('open', () => {
     console.log('Connection opened');
+    withws();
 });
 
 const body = {
-    opcode: '0',
-    operation: 'Project',
-    data: {
-        body: `
+    id: new Date().getTime(),
+    type: 'subscribe',
+    payload: {
+        operationName: 'Project',
+        query: `
             query Project($name: String!) {
                 project(name: $name) {
                     name 
-                    repo
                     contributers
                 }
             }         
@@ -32,7 +33,6 @@ const body = {
 
 const withws = () => {
     ws.send(JSON.stringify(body));
-    console.time('wstime');
 };
 
 const withRest = async () => {
@@ -76,7 +76,7 @@ const httpRestRequest = async () => {
     // });
 };
 
-httpRestRequest();
+// httpRestRequest();
 
 const customWsEvent = () => {
     ws.addEventListener('open', () => {
@@ -89,6 +89,8 @@ const customWsEvent = () => {
 // customWsEvent();
 
 ws.addEventListener('message', (result) => {
-    console.timeEnd('wstime');
-    console.log(JSON.parse(result.data));
+    const data = JSON.parse(result.data);
+    if (data.type === 'next') {
+        console.log('ws', data.payload.data.project);
+    }
 });

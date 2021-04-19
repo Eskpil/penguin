@@ -26,13 +26,13 @@ const Layout: React.FC<Props> = ({ children, container }) => {
                         type="icon"
                     />
                 </Head>
-                <div className="bg-gray-900">
+                <div className="bg-gray-900 h-screen">
                     <Navbar />
-                    <div className="container lg mt-16 ml-24 grid sm:grid-cols-1 md:grid-cols-3 grid-flow-col grid-rows-4">
-                        <div className="">
+                    <div className="container lg mt-16 ml-24 grid sm:grid-cols-1 md:grid-cols-3 grid-flow-col">
+                        <div className="col-span-1 row-span-6">
                             <DocumentationTree />
                         </div>
-                        <div className="col-span-2 row-span-6 bg-gray-800 rounded-2xl">
+                        <div className="col-span-2 row-span-6 bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
                             {children}
                         </div>
                     </div>

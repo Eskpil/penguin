@@ -1,6 +1,7 @@
 import { EventMetadataOptions } from './declarations/Event.metadata';
 import { FieldMetadataOptions } from './declarations/Field.metadata';
 import { InputMetadataOptions } from './declarations/Input.metadata';
+import { MethodMetadataOptions } from './declarations/Method.metadata';
 import { MethodParamMetadataOptions } from './declarations/Method.param.metadata';
 import {
     BuiltModuleMetadataOptions,
@@ -12,16 +13,17 @@ import { QueryMetadataOptions } from './declarations/Query.metadata';
 import { RouteOptions } from './declarations/Route.metadata';
 
 export class Metadata {
-    private routeMetadata: RouteOptions[] = [];
-    private moduleMetadata: ModuleOptions[] = [];
-    private eventMetadata: EventMetadataOptions[] = [];
-    private queryMetadata: QueryMetadataOptions[] = [];
-    private objectMetadata: ObjectMetadataOptions[] = [];
-    private fieldMetadata: FieldMetadataOptions[] = [];
-    private methodParamMetadata: MethodParamMetadataOptions[] = [];
-    private inputMetadata: InputMetadataOptions[] = [];
-    private packageMetadata: PackageMetadataOptions[] = [];
-    private builtModuleMetadata: BuiltModuleMetadataOptions[] = [];
+    routeMetadata: RouteOptions[] = [];
+    moduleMetadata: ModuleOptions[] = [];
+    eventMetadata: EventMetadataOptions[] = [];
+    queryMetadata: QueryMetadataOptions[] = [];
+    objectMetadata: ObjectMetadataOptions[] = [];
+    fieldMetadata: FieldMetadataOptions[] = [];
+    methodParamMetadata: MethodParamMetadataOptions[] = [];
+    inputMetadata: InputMetadataOptions[] = [];
+    packageMetadata: PackageMetadataOptions[] = [];
+    builtModuleMetadata: BuiltModuleMetadataOptions[] = [];
+    methodMetadata: MethodMetadataOptions[] = [];
 
     collectRouteMetadata(options: RouteOptions) {
         this.routeMetadata.push(options);
@@ -128,5 +130,9 @@ export class Metadata {
 
     getBuiltModuleMetadata() {
         return this.builtModuleMetadata;
+    }
+
+    collectMethodMetadata(options: MethodMetadataOptions) {
+        this.methodMetadata.push(options);
     }
 }

@@ -14,10 +14,13 @@
         "typescript": "^4.2.3"
     },
     "peerDependencies": {
-        "@penguin/core": "1.0.0",
         "@penguin/common": "1.0.0",
+        "@penguin/core": "1.0.0",
         "@penguin/graphql": "1.0.0"
     },
     "author": "",
-    "license": "ISC"
+    "license": "ISC",
+    "dependencies": {
+        "reflect-metadata": "^0.1.13"
+    }
 }

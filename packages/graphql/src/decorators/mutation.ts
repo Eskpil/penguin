@@ -5,7 +5,7 @@ interface Options {
     name?: string;
 }
 
-export function Query(type: Function, options?: Options): MethodDecorator {
+export function Mutation(type: Function, options?: Options): MethodDecorator {
     return (prototype, methodName) => {
         getMetadataStorage().collectMethodMetadata({
             parent: prototype.constructor.name,
@@ -21,7 +21,7 @@ export function Query(type: Function, options?: Options): MethodDecorator {
                     ? options.nullable
                     : false
                 : false,
-            kind: 'query',
+            kind: 'mutation',
         });
     };
 }

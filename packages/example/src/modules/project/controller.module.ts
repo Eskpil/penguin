@@ -7,6 +7,12 @@ export class ProjectControllerModule {
     @Get(':name')
     async project(@Ctx() ctx: MyContext) {
         const project = projects.find((p) => p.name === ctx.req.params.name);
+
+        if (!project) {
+            return {
+                message: 'Project does not exist.',
+            };
+        }
         return project;
     }
 

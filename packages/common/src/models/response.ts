@@ -14,7 +14,17 @@ export class Response {
 
     json(values: object | any | string): Response {
         values = JSON.stringify(values);
+        this.append('Content-Type', 'application/json');
+        this.append('Content-Length', values.length);
         this.res.write(values);
+
+        return this;
+    }
+
+    send(text: string): Response {
+        this.append('Content-Type', 'text/html');
+        this.append('Content-Length', text.length);
+        this.res.write(text);
         return this;
     }
 

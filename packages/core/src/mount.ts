@@ -1,25 +1,36 @@
 import { ModuleUtils, Request, Response } from '@penguin/common';
 import { Server, createServer, IncomingMessage } from 'http';
 import WebSocket, { Server as SocketServer } from 'ws';
-import { HttpDistributer } from './handlers/http.distrubuter';
-import { SocketDistributer } from './handlers/socket.distrubuter';
-import { HandlerHelper } from './helpers/handler.helper';
+import { HttpRequest } from './http';
+import { SocketRequest } from './socket';
+import { RequestUtils } from './utils/request';
+import { SocketUtils } from './utils/socket';
 
-interface ContextPayload {
-    req: Request;
-    res: Response;
-    socket: any;
+export interface ContextPayload {
+    req?: Request;
+    res?: Response;
+    socket?: any;
 }
 
+export const METHODS = {
+    GET: 'get',
+    POST: 'post',
+    DELETE: 'delete',
+    PUT: 'put',
+    OPTIONS: 'options',
+    PATCH: 'patch',
+    ALL: 'all',
+};
+
 interface Options {
-    graphql?: {
-        path?: string;
-    };
-    app: {
-        packages: any[];
-        prefix: string;
-        context: (params: ContextPayload) => void;
-    };
+    packages: any[];
+    prefix: string;
+    context: (params: ContextPayload) => void;
+    graphql:
+        | boolean
+        | {
+              path?: string;
+          };
 }
 
 export class Mount {
@@ -28,35 +39,47 @@ export class Mount {
     private server: Server;
     private socketServer: SocketServer;
     private path: string;
+    private gql: boolean;
 
     constructor(options: Options) {
-        this.prefix = options.app.prefix;
-        this.context = options.app.context;
+        this.prefix = options.prefix;
+        this.context = options.context;
 
         if (options.graphql) {
-            if (options.graphql.path) {
-                this.path = options.graphql.path;
+            this.gql = true;
+            if ((options.graphql as any).path) {
+                this.path = (options.graphql as any).path;
             } else {
                 this.path = '/penguin';
             }
         } else {
-            this.path = '/penguin';
+            this.gql = false;
         }
 
-        ModuleUtils.buildFromPacks(options.app.packages);
+        ModuleUtils.buildFromPacks(options.packages);
+        for (const i in METHODS) {
+            RequestUtils.routes[(METHODS as any)[i]] = [];
+        }
+
+        RequestUtils.prefix = this.prefix;
+        RequestUtils.build();
+
+        SocketUtils.build();
     }
 
     listen(port: string | number, cb: Function): Mount {
-        const helper = new HandlerHelper(this.context);
-        const httpDistributer = new HttpDistributer(
-            this.path,
-            this.prefix,
-            helper
+        this.server = createServer(
+            (req, res) =>
+                new HttpRequest({
+                    ctx: this.context,
+                    prefix: this.prefix,
+                    path: this.path,
+                    req,
+                    res,
+                    graphql: this.gql,
+                })
         );
 
-        this.server = createServer((req, res) =>
-            httpDistributer.handle(req, res)
-        );
         this.socketServer = new SocketServer({ noServer: true });
 
         this.server.on('upgrade', (request: IncomingMessage, socket, head) => {
@@ -66,7 +89,14 @@ export class Mount {
                     socket,
                     head,
                     (ws: WebSocket) => {
-                        new SocketDistributer().init(ws, helper);
+                        ws.on('message', (data: any) => {
+                            new SocketRequest({
+                                socket: ws,
+                                context: this.context,
+                                gql: this.gql,
+                                data,
+                            });
+                        });
                     }
                 );
             } else {

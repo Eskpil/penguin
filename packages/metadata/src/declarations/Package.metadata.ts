@@ -1,5 +1,6 @@
 export interface PackageMetadataOptions {
-    imports: any[];
+    imports?: any[];
+    modules: any[];
     name: string;
     prefix: string;
 }

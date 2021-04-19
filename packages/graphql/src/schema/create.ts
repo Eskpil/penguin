@@ -21,16 +21,21 @@ export class SchemaGenerator {
     build(): GraphQLSchema {
         return new GraphQLSchema({
             query: this.buildQueryTypes(),
+            mutation: this.buildMutationTypes(),
         });
     }
 
     buildQueryTypes() {
-        const queries = getMetadataStorage().getQueryMetadata();
-
+        const queries = getMetadataStorage().methodMetadata.filter(
+            (m) => m.kind === 'query'
+        );
         const fields: {
             [key: string]: any;
         } = {};
 
+        if (!queries) {
+            throw new Error('Graphql reqiures atleast one graphql query.');
+        }
         for (const query of queries) {
             const type = this.getGraphqlOutputType(query);
             const module = ModuleUtils.find(query.parent);
@@ -67,6 +72,57 @@ export class SchemaGenerator {
 
         return new GraphQLObjectType({
             name: 'Query',
+            fields,
+        });
+    }
+
+    buildMutationTypes() {
+        const mutations = getMetadataStorage().methodMetadata.filter(
+            (m) => m.kind === 'mutation'
+        );
+        const fields: {
+            [key: string]: any;
+        } = {};
+
+        if (!mutations) {
+            return;
+        }
+        for (const mutation of mutations) {
+            const type = this.getGraphqlOutputType(mutation);
+            const module = ModuleUtils.find(mutation.parent);
+
+            if (!module) {
+                throw new Error(
+                    `Query: ${mutation.name} does not have a parent registered in metadata.`
+                );
+            }
+
+            const args: {
+                [key: string]: any;
+            } = {};
+
+            const methodParams = getMetadataStorage().getGroupMethodMetadata(
+                mutation.methodName,
+                module.name,
+                'gql'
+            );
+
+            for (const arg of methodParams.filter((m) => m.kind === 'arg')) {
+                const argType = this.getGraphqlInputType(arg);
+                args[arg.name!] = {
+                    type: argType,
+                };
+            }
+
+            fields[mutation.name] = {
+                type,
+                args,
+                resolve: Resolvers.create(module, mutation),
+            };
+        }
+
+        return new GraphQLObjectType({
+            name: 'Mutation',
             fields,
         });
     }

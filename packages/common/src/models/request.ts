@@ -5,22 +5,31 @@ export class Request {
     body: any;
 
     headers: {
-        [header: string]: RequestHeaders;
+        [header: string]: string;
     } = {};
 
     raw: IncomingMessage;
 
-    params: any;
-    constructor(req: IncomingMessage, params?: any) {
-        this.raw = req;
+    params: {
+        [param: string]: string;
+    };
 
-        if (params) {
-            this.params = params;
-        }
+    constructor(req: IncomingMessage) {
+        this.raw = req;
     }
 
     get(name: RequestHeaders) {
         return this.headers[name as any];
+    }
+
+    public buildHeaders(): { [key: string]: string } {
+        const keys = Object.entries(this.raw.headers);
+        keys.forEach((header) => {
+            this.headers[header[0]] = header[1]?.toString()!;
+        });
+
+        // return keys;
+        return this.headers;
     }
 
     get url() {
@@ -31,7 +40,7 @@ export class Request {
         return this.raw.method!;
     }
 
-    async buildBody() {
+    async buildBody(cb?: (body: any) => void) {
         return new Promise((res, rej) => {
             let dataBuffer = '';
             this.raw.on('data', (chunk) => {
@@ -42,9 +51,18 @@ export class Request {
 
             this.raw.on('end', () => {
                 const decoder = new TextDecoder('utf8');
-                const json = JSON.parse(dataBuffer);
-
-                res(json);
+                if (
+                    this.headers['Content-Type'] === 'application/json' ||
+                    this.headers['content-type'] === 'application/json'
+                ) {
+                    const json = JSON.parse(dataBuffer);
+                    if (cb) {
+                        cb(json);
+                        res(json);
+                    } else {
+                        res(json);
+                    }
+                }
             });
         });
     }
